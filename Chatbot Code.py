@@ -12,7 +12,7 @@ def load_and_combine_datasets(file_patterns):
         for file_path in glob.glob(pattern, recursive=True):
             try:
                 if file_path.endswith('.csv'):
-                    df = pd.read_csv(file_path)
+                    df = pd.read_csv(file_path, on_bad_lines='skip')
                     if 'Context' in df.columns and 'Response' in df.columns:
                         context = " ".join(df['Context'].dropna().astype(str).tolist())
                         response = " ".join(df['Response'].dropna().astype(str).tolist())
@@ -116,5 +116,3 @@ def handle_conversation():
 
 if __name__ == "__main__":
     handle_conversation() 
-
-                      
