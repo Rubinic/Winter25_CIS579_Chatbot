@@ -85,10 +85,54 @@ print(confusion_matrix(testing_df['Class'], testing_df['Pred_Class']))
 
 
 
+# Incorporating in supplemental dataset
+## Reading in csv
+second_df = pd.read_csv("Datasets/socialmediasentimentdataset.csv")
 
-### SAVING OUT MODEL WITH BEST PERFORMANCE FOR CHATBOT  ###
+## Cleaning second dataset
+posneg = {'Negative': 'neg', 'Positive': 'pos'}
+second_df['posneg'] = second_df['Sentiment'].map(posneg)
+second_df = second_df.drop(['Hashtags', 'Sentiment'], axis=1)
+second_df = second_df.dropna(subset=['posneg'])
 
+
+### UPDATING DATA TO MODEL AND SAVING OUT MODEL WITH BEST PERFORMANCE FOR CHATBOT  ###
 if (nb_score > dt_score):
-    joblib.dump(nb_cl, 'BestClassifierModel.pkl')
+    ## adding in supplemental data for model
+    sup_data = list(zip(second_df['Text'], second_df['posneg']))
+    nb_cl_2 = nb_cl
+    nb_cl_2.update(sup_data)
+
+    ## Getting new accuracy score with new data included.
+    with open('TestTrainData/testing_data.csv', 'r') as testingdata:
+        nb_score_2 = nb_cl_2.accuracy(testingdata, format='csv')
+        print("NAIVE BAYES CLASSIFIER PERFORMANCE")
+        print("Accuracy Score: ", nb_score_2)
+
+    if (nb_score_2 > nb_score):
+        joblib.dump(nb_cl_2, 'BestClassifierModel.pkl')
+    elif (nb_score_2 < nb_score):
+        joblib.dump(nb_cl, 'BestClassifierModel.pkl')
+
+    print("Script execution completed successfully.")
+    quit()
+
 elif (nb_score < dt_score):
-    joblib.dump(dt_cl, 'BestClassifierModel.pkl')
+    ## adding in supplemental data for model
+    sup_data = list(zip(second_df['Text'], second_df['posneg']))
+    dt_cl_2 = nb_cl
+    dt_cl_2.update(sup_data)
+
+    ## Getting new accuracy score with new data included.
+    with open('TestTrainData/testing_data.csv', 'r') as testingdata:
+        dt_score_2 = dt_cl_2.accuracy(testingdata, format='csv')
+        print("DECISION TREE CLASSIFIER PERFORMANCE")
+        print("Accuracy Score: ", dt_score_2)
+
+    if (dt_score_2 > dt_score):
+        joblib.dump(dt_cl_2, 'BestClassifierModel.pkl')
+    elif (dt_score_2 < dt_score):
+        joblib.dump(dt_cl, 'BestClassifierModel.pkl')
+
+    print("Script execution completed successfully.")
+    quit()
